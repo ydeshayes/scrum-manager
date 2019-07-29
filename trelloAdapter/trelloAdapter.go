@@ -1,0 +1,158 @@
+package trelloAdapter
+
+import (
+	"encoding/json"
+	"fmt"
+
+	trello "github.com/adlio/trello"
+	common "github.com/ydeshayes/dev-diary/common"
+)
+
+type TrelloAdapter struct {
+	config Configuration
+	client *trello.Client
+	board  *trello.Board
+}
+
+func (t *TrelloAdapter) Initialize(configuration common.Configuration) {
+	t.config = getConfiguration(configuration)
+	t.client = trello.NewClient(t.config.Apikey, t.config.Token)
+	board, err := t.client.GetBoard(t.config.TrelloBoardId, trello.Defaults())
+	if err != nil {
+		fmt.Println("Error loading the board " + t.config.TrelloBoardId)
+	}
+	t.board = board
+}
+
+func (t TrelloAdapter) Add(description string, listName string) {
+	lists, err := t.board.GetLists(trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting the lists")
+	}
+	if len(lists) == 0 {
+		// Create the lists
+		lists, err = t.createDefaultLists()
+	}
+
+	list, err := t.getlistByName(listName, lists)
+	if err != nil {
+		fmt.Println("Error loading the list todos")
+	}
+
+	card := trello.Card{
+		Name:   description,
+		Desc:   description,
+		IDList: list.ID,
+	}
+
+	err = t.client.CreateCard(&card, trello.Defaults())
+
+	if err != nil {
+		fmt.Println("Error creating card ")
+		fmt.Println(err)
+	}
+}
+
+func (t TrelloAdapter) List(name string) []common.Task {
+	lists, err := t.board.GetLists(trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting the list")
+		fmt.Println(err)
+	}
+	var tasks []common.Task
+	list, err := t.getlistByName(name, lists)
+	cards, err := list.GetCards(trello.Defaults())
+
+	for _, card := range cards {
+		tasks = append(tasks, cardToTask(card))
+	}
+
+	return tasks
+}
+
+func (t TrelloAdapter) createDefaultLists() (lists []*trello.List, err error) {
+	list, err := t.board.CreateList("todos", trello.Arguments{"pos": "1"})
+	lists = append(lists, list)
+
+	if err != nil {
+		fmt.Println("Error creating list todos")
+		fmt.Println(err)
+	}
+
+	list, err = t.board.CreateList("next", trello.Arguments{"pos": "2"})
+	lists = append(lists, list)
+
+	if err != nil {
+		fmt.Println("Error creating list in_progress")
+		fmt.Println(err)
+	}
+
+	list, err = t.board.CreateList("today", trello.Arguments{"pos": "3"})
+	lists = append(lists, list)
+
+	if err != nil {
+		fmt.Println("Error creating list done")
+		fmt.Println(err)
+	}
+
+	list, err = t.board.CreateList("archives", trello.Arguments{"pos": "4"})
+	lists = append(lists, list)
+
+	if err != nil {
+		fmt.Println("Error creating list archives")
+		fmt.Println(err)
+	}
+
+	return
+}
+
+func (t TrelloAdapter) getlistByName(name string, lists []*trello.List) (*trello.List, error) {
+	for _, list := range lists {
+		if list.Name == name {
+			return list, nil
+		}
+	}
+
+	list, err := t.board.CreateList(name, trello.Defaults())
+
+	return list, err
+}
+
+func (t TrelloAdapter) NextScrum() {
+	lists, err := t.board.GetLists(trello.Defaults())
+	todayList, err := t.getlistByName("today", lists)
+	nextList, err := t.getlistByName("next", lists)
+	archivedList, err := t.getlistByName("archived", lists)
+
+	if err != nil {
+		fmt.Println("Error getting lists")
+		fmt.Println(err)
+	}
+	t.archiveList(todayList, archivedList)
+	moveAllCardsBetweenLists(nextList, todayList.ID)
+}
+
+func (t TrelloAdapter) archiveList(todayList *trello.List, archiveList *trello.List) {
+	cards, err := todayList.GetCards(trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting today list cards")
+		fmt.Println(err)
+	}
+	// Serialize cards in json?
+	serializedCards, err := json.Marshal(cards)
+	if err != nil {
+		fmt.Println("Error serialize cards")
+		fmt.Println(err)
+	}
+	date := common.GetNow()
+	card := trello.Card{
+		Name:   date.Format("02-01-2006"),
+		Desc:   string(serializedCards),
+		IDList: archiveList.ID,
+	}
+
+	t.client.CreateCard(&card, trello.Defaults())
+	for _, card := range cards {
+		card.Update(trello.Arguments{"closed": "true"})
+	}
+}
