@@ -64,7 +64,7 @@ func selectAdapter(config common.Configuration) common.Adapter {
 	return adapter
 }
 
-func generateScrum(todayTasks []common.Task, nextTasks []common.Task, title string) string {
+func generateScrum(todayTasks []*common.Task, nextTasks []*common.Task, title string) string {
 	scrumText := title + "\n" + "Today:\n"
 	for _, task := range todayTasks {
 		scrumText += " - " + task.Title + "\n"

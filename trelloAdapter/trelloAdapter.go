@@ -53,18 +53,18 @@ func (t TrelloAdapter) Add(description string, listName string) {
 	}
 }
 
-func (t TrelloAdapter) List(name string) []common.Task {
+func (t TrelloAdapter) List(name string) []*common.Task {
 	lists, err := t.board.GetLists(trello.Defaults())
 	if err != nil {
 		fmt.Println("Error getting the list")
 		fmt.Println(err)
 	}
-	var tasks []common.Task
+	var tasks []*common.Task
 	list, err := t.getlistByName(name, lists)
 	cards, err := list.GetCards(trello.Defaults())
 
 	for _, card := range cards {
-		tasks = append(tasks, cardToTask(card))
+		tasks = append(tasks, cardToTask(*card))
 	}
 
 	return tasks
@@ -128,11 +128,11 @@ func (t TrelloAdapter) NextScrum() {
 		fmt.Println("Error getting lists")
 		fmt.Println(err)
 	}
-	t.archiveList(todayList, archivedList)
-	moveAllCardsBetweenLists(nextList, todayList.ID)
+	t.archiveList(*todayList, *archivedList)
+	moveAllCardsBetweenLists(*nextList, todayList.ID)
 }
 
-func (t TrelloAdapter) archiveList(todayList *trello.List, archiveList *trello.List) {
+func (t TrelloAdapter) archiveList(todayList trello.List, archiveList trello.List) {
 	cards, err := todayList.GetCards(trello.Defaults())
 	if err != nil {
 		fmt.Println("Error getting today list cards")
@@ -145,13 +145,13 @@ func (t TrelloAdapter) archiveList(todayList *trello.List, archiveList *trello.L
 		fmt.Println(err)
 	}
 	date := common.GetNow()
-	card := trello.Card{
+	card := &trello.Card{
 		Name:   date.Format("02-01-2006"),
 		Desc:   string(serializedCards),
 		IDList: archiveList.ID,
 	}
 
-	t.client.CreateCard(&card, trello.Defaults())
+	t.client.CreateCard(card, trello.Defaults())
 	for _, card := range cards {
 		card.Update(trello.Arguments{"closed": "true"})
 	}

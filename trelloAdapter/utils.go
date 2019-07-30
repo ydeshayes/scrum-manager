@@ -7,7 +7,7 @@ import (
 	common "github.com/ydeshayes/dev-diary/common"
 )
 
-func moveAllCardsBetweenLists(list *trello.List, newListId string) {
+func moveAllCardsBetweenLists(list trello.List, newListId string) {
 	cards, err := list.GetCards(trello.Defaults())
 
 	if err != nil {
@@ -20,12 +20,12 @@ func moveAllCardsBetweenLists(list *trello.List, newListId string) {
 	}
 }
 
-func cardToTask(card *trello.Card) common.Task {
+func cardToTask(card trello.Card) *common.Task {
 	task := common.Task{Id: card.ID, Title: card.Name, Description: card.Desc, CreationDateTime: card.CreatedAt(), StartDateTime: card.CreatedAt()}
 
 	if card.DueComplete {
 		task.DoneDateTime = *card.DateLastActivity
 	}
 
-	return task
+	return &task
 }
