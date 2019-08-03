@@ -23,7 +23,7 @@ You can select todos and move them into the today and next part of the scrum (Se
 ### Generate your scrum report (it will copy the scrum report into the clipboard)
     ./main scrum
 - When you generate the scrum, it will archived the today tasks and move the next tasks into today for the next scrum. If you don't have blockers yet, it will ask you if you want to add one.
-- If you activate the google calendar integregation, it will copy all the event that you had since the last srum into the today part of the new scrum.
+- If you activate the google calendar integregation, it will copy all the event that you had since the last scrum into the today part of the new scrum.
 
 ## Lists
 The lists that you can use are:
