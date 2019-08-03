@@ -40,3 +40,8 @@ For now the config file need to be in `~/.scrum-manager`
 	"ScrumWelcomeText": "Hello! this is my scrum"
 }
 ```
+
+## Build
+```
+go build main.go
+```
