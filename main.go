@@ -9,6 +9,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	common "github.com/ydeshayes/dev-diary/common"
+	googleCalendar "github.com/ydeshayes/dev-diary/googleCalendar"
 	trelloAdapter "github.com/ydeshayes/dev-diary/trelloAdapter"
 )
 
@@ -31,6 +32,11 @@ func main() {
 		text := os.Args[2]
 		adapter.Add(text, "next")
 	case "scrum":
+		lastScrumDate := adapter.LastScrumDate()
+		if config.GoogleAppCredentialPath != "" {
+			googleCalendar.Connect(config.GoogleAppCredentialPath, lastScrumDate, adapter, false)
+		}
+
 		todayList := adapter.List("today")
 		nextList := adapter.List("next")
 		scrum := generateScrum(todayList, nextList, config.ScrumWelcomeText)
@@ -43,6 +49,12 @@ func main() {
 		adapter.NextScrum()
 		break
 	case "scrum-preview":
+		lastScrumDate := adapter.LastScrumDate()
+
+		if config.GoogleAppCredentialPath != "" {
+			googleCalendar.Connect(config.GoogleAppCredentialPath, lastScrumDate, adapter, true)
+		}
+
 		todayList := adapter.List("today")
 		nextList := adapter.List("next")
 		scrum := generateScrum(todayList, nextList, config.ScrumWelcomeText)

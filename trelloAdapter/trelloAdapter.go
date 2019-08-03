@@ -3,6 +3,7 @@ package trelloAdapter
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	trello "github.com/adlio/trello"
 	common "github.com/ydeshayes/dev-diary/common"
@@ -174,4 +175,17 @@ func (t TrelloAdapter) archiveList(todayList trello.List, archiveList trello.Lis
 	for _, card := range cards {
 		card.Update(trello.Arguments{"closed": "true"})
 	}
+}
+
+func (t TrelloAdapter) LastScrumDate() time.Time {
+	lists, err := t.board.GetLists(trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting the list")
+		fmt.Println(err)
+	}
+
+	list, err := t.getlistByName("archived", lists)
+	cards, _ := list.GetCards(trello.Arguments{"limit": "1"})
+
+	return cards[0].CreatedAt()
 }

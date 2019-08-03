@@ -13,7 +13,8 @@ type Configuration struct {
 	TrelloToken   string
 	TrelloBoardId string
 
-	ScrumWelcomeText string
+	ScrumWelcomeText        string
+	GoogleAppCredentialPath string
 }
 
 func GetConfiguration() Configuration {

@@ -37,10 +37,12 @@ For now the config file need to be in `~/.scrum-manager`
 	"TrelloToken": "",
 	"TrelloBoardId": "",
 
-	"ScrumWelcomeText": "Hello! this is my scrum"
+	"ScrumWelcomeText": "Hello! this is my scrum",
+    "GoogleAppCredentialPath": "[Optional] Absolute path to the google app credential json file"
 }
 ```
-
+## Google calendar integration
+- Please visit [quickstart](https://developers.google.com/calendar/quickstart/go) to generate your json crendential file
 ## Build
 ```
 go build main.go
