@@ -31,21 +31,31 @@ func main() {
 	case "add-next":
 		text := os.Args[2]
 		adapter.Add(text, "next")
+	case "add-blocker":
+		text := os.Args[2]
+		adapter.Add(text, "blockers")
 	case "scrum":
 		lastScrumDate := adapter.LastScrumDate()
 		if config.GoogleAppCredentialPath != "" {
 			googleCalendar.Connect(config.GoogleAppCredentialPath, lastScrumDate, adapter, false)
 		}
 
+		blockers := adapter.List("blockers")
+		if len(blockers) == 0 {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Println("Any bloker? (leave empty if not):")
+			blockerText, _ := reader.ReadString('\n')
+			if blockerText != "No" && blockerText != "no" && blockerText != "" {
+				adapter.Add(blockerText, "blockers")
+			}
+		}
+
 		todayList := adapter.List("today")
 		nextList := adapter.List("next")
-		scrum := generateScrum(todayList, nextList, config.ScrumWelcomeText)
+		blockers = adapter.List("blockers")
+		scrum := generateScrum(todayList, nextList, blockers, config.ScrumWelcomeText)
 		fmt.Print(scrum)
 		clipboard.WriteAll(scrum)
-		// TODO:
-		// Ask something to add for today?
-		// Ask something to add next?
-		// Ask any bloker?
 		adapter.NextScrum()
 		break
 	case "scrum-preview":
@@ -57,7 +67,8 @@ func main() {
 
 		todayList := adapter.List("today")
 		nextList := adapter.List("next")
-		scrum := generateScrum(todayList, nextList, config.ScrumWelcomeText)
+		blockers := adapter.List("blockers")
+		scrum := generateScrum(todayList, nextList, blockers, config.ScrumWelcomeText)
 		fmt.Print(scrum)
 		clipboard.WriteAll(scrum)
 		break
@@ -120,13 +131,23 @@ func selectAdapter(config common.Configuration) common.Adapter {
 	return adapter
 }
 
-func generateScrum(todayTasks []*common.Task, nextTasks []*common.Task, title string) string {
+func generateScrum(todayTasks []*common.Task, nextTasks []*common.Task, blockers []*common.Task, title string) string {
 	scrumText := title + "\n" + "Today:\n"
 	for _, task := range todayTasks {
 		scrumText += " - " + task.Title + "\n"
 	}
 	scrumText += "Next:\n"
+	if len(nextTasks) == 0 {
+		scrumText += "  No next task for now\n"
+	}
 	for _, task := range nextTasks {
+		scrumText += " - " + task.Title + "\n"
+	}
+	scrumText += "Blockers:\n"
+	if len(blockers) == 0 {
+		scrumText += "  None\n"
+	}
+	for _, task := range blockers {
 		scrumText += " - " + task.Title + "\n"
 	}
 

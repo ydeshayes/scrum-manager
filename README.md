@@ -14,6 +14,8 @@ In the future it will be possible to select todos and move them into the today a
     ./main add-today "Add this task to the today part of the scrum"
 ### Next:
     ./main add-next "Add this task to the next part of the scrum"
+### Blockers:
+    ./main add-blocker "Add this task to the blockers part of the scrum"
 ### Move:
     ./main move [listName1 listName2] (see possible lists bellow)
 - Default is todos to today
@@ -21,13 +23,14 @@ In the future it will be possible to select todos and move them into the today a
     ./main scrum-preview
 ### Generate your scrum report (it will copy the scrum report into the clipboard)
     ./main scrum
-- When you generate the scrum, it will archived the today tasks and move the next tasks into today for the next scrum.
+- When you generate the scrum, it will archived the today tasks and move the next tasks into today for the next scrum. If you don't have blockers yet, it will ask you if you want to add one.
 
 ## Lists
 The lists that you can use are:
 - todos
 - today
 - next
+- blockers
 ## Config
 For now the config file need to be in `~/.scrum-manager`
 ```

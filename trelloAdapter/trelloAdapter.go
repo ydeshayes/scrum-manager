@@ -142,24 +142,37 @@ func (t TrelloAdapter) NextScrum() {
 	lists, err := t.board.GetLists(trello.Defaults())
 	todayList, err := t.getlistByName("today", lists)
 	nextList, err := t.getlistByName("next", lists)
+	blockersList, err := t.getlistByName("blockers", lists)
 	archivedList, err := t.getlistByName("archived", lists)
 
 	if err != nil {
 		fmt.Println("Error getting lists")
 		fmt.Println(err)
 	}
-	t.archiveList(*todayList, *archivedList)
+	t.archiveList(*todayList, *blockersList, *archivedList)
 	moveAllCardsBetweenLists(*nextList, todayList.ID)
 }
 
-func (t TrelloAdapter) archiveList(todayList trello.List, archiveList trello.List) {
+func (t TrelloAdapter) archiveList(todayList trello.List, blockersList trello.List, archiveList trello.List) {
 	cards, err := todayList.GetCards(trello.Defaults())
 	if err != nil {
 		fmt.Println("Error getting today list cards")
 		fmt.Println(err)
 	}
+
+	blockers, err := blockersList.GetCards(trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting blockers list cards")
+		fmt.Println(err)
+	}
+
 	// Serialize cards in json?
-	serializedCards, err := json.Marshal(cards)
+	serializedTodayCards, err := json.Marshal(cards)
+	if err != nil {
+		fmt.Println("Error serialize cards")
+		fmt.Println(err)
+	}
+	serializedBlockersCards, err := json.Marshal(blockers)
 	if err != nil {
 		fmt.Println("Error serialize cards")
 		fmt.Println(err)
@@ -167,7 +180,7 @@ func (t TrelloAdapter) archiveList(todayList trello.List, archiveList trello.Lis
 	date := common.GetNow()
 	card := &trello.Card{
 		Name:   date.Format("02-01-2006"),
-		Desc:   string(serializedCards),
+		Desc:   string(serializedTodayCards) + " {------} " + string(serializedBlockersCards),
 		IDList: archiveList.ID,
 	}
 
