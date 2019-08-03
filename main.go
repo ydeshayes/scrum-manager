@@ -18,6 +18,10 @@ func main() {
 	adapter := selectAdapter(config)
 	adapter.Initialize(config)
 
+	if len(os.Args) == 1 {
+		fmt.Println("Please read the README")
+	}
+
 	switch os.Args[1] {
 	// Add task to todo
 	case "add":
