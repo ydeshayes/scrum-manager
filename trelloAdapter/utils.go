@@ -20,6 +20,10 @@ func moveAllCardsBetweenLists(list trello.List, newListId string) {
 	}
 }
 
+func moveCardToList(card trello.Card, newListId string) {
+	card.MoveToList(newListId, trello.Defaults())
+}
+
 func cardToTask(card trello.Card) *common.Task {
 	task := common.Task{Id: card.ID, Title: card.Name, Description: card.Desc, CreationDateTime: card.CreatedAt(), StartDateTime: card.CreatedAt()}
 

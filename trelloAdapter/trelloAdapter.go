@@ -70,6 +70,25 @@ func (t TrelloAdapter) List(name string) []*common.Task {
 	return tasks
 }
 
+func (t TrelloAdapter) Move(task common.Task, newListName string) error {
+	lists, err := t.board.GetLists(trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting the list")
+		fmt.Println(err)
+		return err
+	}
+	list, err := t.getlistByName(newListName, lists)
+	card, err := t.client.GetCard(task.Id, trello.Defaults())
+	if err != nil {
+		fmt.Println("Error getting the card " + task.Id)
+		return err
+	}
+
+	card.MoveToList(list.ID, trello.Defaults())
+
+	return err
+}
+
 func (t TrelloAdapter) createDefaultLists() (lists []*trello.List, err error) {
 	list, err := t.board.CreateList("todos", trello.Arguments{"pos": "1"})
 	lists = append(lists, list)
