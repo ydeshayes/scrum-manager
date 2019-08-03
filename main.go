@@ -95,7 +95,7 @@ func main() {
 	case "done":
 		break
 	default:
-		fmt.Println("expected 'foo' or 'bar' subcommands")
+		fmt.Println("expected 'add' or 'move' or 'scrum-preview' or 'scrum' subcommands")
 		os.Exit(1)
 	}
 }
