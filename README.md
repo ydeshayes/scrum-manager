@@ -51,3 +51,7 @@ For now the config file need to be in `~/.scrum-manager`
 ```
 go build main.go
 ```
+## Install
+```
+./install.sh
+```
