@@ -18,6 +18,7 @@ type TrelloAdapter struct {
 func (t *TrelloAdapter) Initialize(configuration common.Configuration) {
 	t.config = getConfiguration(configuration)
 	t.client = trello.NewClient(t.config.Apikey, t.config.Token)
+
 	board, err := t.client.GetBoard(t.config.TrelloBoardId, trello.Defaults())
 	if err != nil {
 		fmt.Println("Error loading the board " + t.config.TrelloBoardId)
@@ -60,15 +61,11 @@ func (t TrelloAdapter) List(name string) []*common.Task {
 		fmt.Println("Error getting the list")
 		fmt.Println(err)
 	}
-	var tasks []*common.Task
+
 	list, err := t.getlistByName(name, lists)
 	cards, err := list.GetCards(trello.Defaults())
 
-	for _, card := range cards {
-		tasks = append(tasks, cardToTask(*card))
-	}
-
-	return tasks
+	return cardsListToTasksList(cards)
 }
 
 func (t TrelloAdapter) Move(task common.Task, newListName string) error {
@@ -154,7 +151,7 @@ func (t TrelloAdapter) NextScrum() {
 }
 
 func (t TrelloAdapter) archiveList(todayList trello.List, blockersList trello.List, archiveList trello.List) {
-	cards, err := todayList.GetCards(trello.Defaults())
+	cards, err := todayList.GetCards(trello.Arguments{"fields": "idShort,name"})
 	if err != nil {
 		fmt.Println("Error getting today list cards")
 		fmt.Println(err)
@@ -167,12 +164,12 @@ func (t TrelloAdapter) archiveList(todayList trello.List, blockersList trello.Li
 	}
 
 	// Serialize cards in json?
-	serializedTodayCards, err := json.Marshal(cards)
+	serializedTodayCards, err := json.Marshal(cardsListToArchivedTasksList(cards))
 	if err != nil {
 		fmt.Println("Error serialize cards")
 		fmt.Println(err)
 	}
-	serializedBlockersCards, err := json.Marshal(blockers)
+	serializedBlockersCards, err := json.Marshal(cardsListToArchivedTasksList(blockers))
 	if err != nil {
 		fmt.Println("Error serialize cards")
 		fmt.Println(err)
@@ -184,7 +181,11 @@ func (t TrelloAdapter) archiveList(todayList trello.List, blockersList trello.Li
 		IDList: archiveList.ID,
 	}
 
-	t.client.CreateCard(card, trello.Defaults())
+	err = t.client.CreateCard(card, trello.Defaults())
+	if err != nil {
+		fmt.Println("Error Archiving!")
+		fmt.Println(err)
+	}
 	for _, card := range cards {
 		card.Update(trello.Arguments{"closed": "true"})
 	}

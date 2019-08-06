@@ -10,3 +10,7 @@ type Task struct {
 	StartDateTime    time.Time
 	DoneDateTime     time.Time
 }
+
+type ArchivedTask struct {
+	Id string
+}

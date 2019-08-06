@@ -24,6 +24,26 @@ func moveCardToList(card trello.Card, newListId string) {
 	card.MoveToList(newListId, trello.Defaults())
 }
 
+func cardsListToTasksList(cards []*trello.Card) []*common.Task {
+	var tasks []*common.Task
+
+	for _, card := range cards {
+		tasks = append(tasks, cardToTask(*card))
+	}
+
+	return tasks
+}
+
+func cardsListToArchivedTasksList(cards []*trello.Card) []*common.ArchivedTask {
+	var tasks []*common.ArchivedTask
+
+	for _, card := range cards {
+		tasks = append(tasks, &common.ArchivedTask{Id: card.ID})
+	}
+
+	return tasks
+}
+
 func cardToTask(card trello.Card) *common.Task {
 	task := common.Task{Id: card.ID, Title: card.Name, Description: card.Desc, CreationDateTime: card.CreatedAt(), StartDateTime: card.CreatedAt()}
 
