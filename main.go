@@ -49,7 +49,7 @@ func main() {
 			reader := bufio.NewReader(os.Stdin)
 			fmt.Println("Any bloker? (leave empty if not):")
 			blockerText, _ := reader.ReadString('\n')
-			if blockerText != "No" && blockerText != "no" && blockerText != "" {
+			if blockerText != "No\n" && blockerText != "no\n" && blockerText != "\n" {
 				adapter.Add(blockerText, "blockers")
 			}
 		}
