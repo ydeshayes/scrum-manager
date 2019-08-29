@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"golang.org/x/net/context"
@@ -22,7 +23,7 @@ func getClient(config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := os.TempDir() + "token.json"
+	tokFile := filepath.Join(os.TempDir(), "token.json")
 
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
