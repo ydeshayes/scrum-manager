@@ -105,9 +105,21 @@ func Connect(credentialPath string, timeMin time.Time, adapter common.Adapter, p
 			fmt.Println("Preview of events that would be added today:")
 		}
 		for _, item := range events.Items {
-			fmt.Println("   - Adding " + item.Summary)
-			if preview == false {
-				adapter.Add(item.Summary, "today")
+			if item.Status == "confirmed" {
+				accepted := false
+				for _, attendee := range item.Attendees {
+					if attendee.Self {
+						if attendee.ResponseStatus == "accepted" {
+							accepted = true
+						}
+					}
+				}
+				if accepted {
+					fmt.Println("   - Adding " + item.Summary)
+					if preview == false {
+						adapter.Add(item.Summary, "today")
+					}
+				}
 			}
 		}
 	}
